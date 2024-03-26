@@ -20,7 +20,9 @@ app.use(morgan("dev"));
 const port = process.env.PORT || 5001;
 
 
-app.use("/user",userController)
+app.use("/api/user",userController)
+
+
 app.get("/test", (req, res) => {
   res.status(200).json({ message: "Backend Is Working" });
 });

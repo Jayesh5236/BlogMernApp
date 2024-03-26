@@ -1,8 +1,15 @@
 import express from "express";
 import userModel from "../../Models/User/userModel.js";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 const router = express.Router();
+
+/*
+    API: Register User
+    Method : POST
+    Desc : User signup
+    Access Type : Public
+*/
 
 router.post("/register", async (req, res) => {
   try {
@@ -28,15 +35,11 @@ router.post("/register", async (req, res) => {
       return res.status(200).json({ message: "Already Register please login" });
     }
 
-    req.body.password = await bcrypt.hash(req.body.password, 12);
+    req.body.password = await bcryptjs.hash(req.body.password, 12);
     //save user
 
-    const user = new userModel({
-      username,
-      email,
-      password,
-      phone,
-    });
+    // New User
+    const user = new userModel(req.body);
 
     await user.save();
     res.status(200).json({ message: "Registration SuccessFull" });
@@ -45,7 +48,25 @@ router.post("/register", async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error iN User Controller",
+      message: "Error iN Register User Controller",
+    });
+  }
+});
+
+/*
+    API: Login User
+    Method : POST
+    Desc : User Login
+    Access Type : Public
+*/
+
+router.post("/login", async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error iN Register User Controller",
     });
   }
 });

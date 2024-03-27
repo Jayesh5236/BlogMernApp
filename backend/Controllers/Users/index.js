@@ -22,7 +22,7 @@ router.post(
   async (req, res) => {
     try {
       const { username, email, password, phone } = req.body;
-      
+
       //check user
       const exisitingUser = await userModel.findOne({ email });
       //exisiting user
@@ -39,7 +39,9 @@ router.post(
       const user = new userModel(req.body);
 
       await user.save();
-      res.status(200).json({ message: "Registration SuccessFull" });
+      res
+        .status(200)
+        .send({ success: true, message: "Registration SuccessFull", user });
       // console.log(req.body);
     } catch (error) {
       console.log(error);

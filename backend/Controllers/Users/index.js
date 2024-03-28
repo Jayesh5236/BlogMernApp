@@ -29,7 +29,7 @@ router.post(
       if (exisitingUser) {
         return res
           .status(200)
-          .json({ message: "Already Register please login" });
+          .send({ success: false, message: "Already Register please login" });
       }
 
       req.body.password = await bcryptjs.hash(req.body.password, 12);

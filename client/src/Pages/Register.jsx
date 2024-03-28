@@ -1,4 +1,4 @@
-import { Button, Label, TextInput } from "flowbite-react";
+import { Alert, Button, Label, TextInput, Spinner } from "flowbite-react";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,16 +6,35 @@ import axios from "axios";
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.password ||
+      !formData.phone
+    ) {
+      return setError("Please Fill Out The Fields");
+    }
     try {
+      setLoading(true);
+      setError(null);
       const res = await axios.post("api/user/register", formData);
-      const data = await res.json();
-      // navigate("/");
+      if (res.data.success === false) {
+        return setError(res.data.message);
+      }
+      setLoading(false);
+      if (res.data.success === true) {
+        navigate("/login");
+      }
       // Handle response as needed
     } catch (error) {
       console.log(error);
+      setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -87,8 +106,19 @@ const Register = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <Button gradientDuoTone="purpleToPink" type="submit">
-              Register
+            <Button
+              gradientDuoTone="purpleToPink"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner size="sm" />
+                  <span className="pl-3">Loading...</span>
+                </>
+              ) : (
+                "Register"
+              )}
             </Button>
           </form>
           <div className="flex gap-2 text-sm mt-5">
@@ -97,6 +127,11 @@ const Register = () => {
               Sign In
             </Link>
           </div>
+          {error && (
+            <Alert className="mt-5" color="failure">
+              {error}
+            </Alert>
+          )}
         </div>
       </div>
     </div>

@@ -7,12 +7,12 @@ import Projects from "./Pages/Projects";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import Header from "./Components/Header";
+import FooterComponent from "./Components/FooterComponent";
 
 function App() {
   return (
     <>
       <Header />
-
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/about" element={<About />} />
@@ -21,6 +21,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
       </Routes>
+      <FooterComponent />
     </>
   );
 }

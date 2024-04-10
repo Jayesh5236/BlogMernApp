@@ -34,7 +34,6 @@ router.post(
       }
 
       req.body.password = await bcryptjs.hash(req.body.password, 12);
-      //save user
 
       // New User
       const user = new userModel(req.body);
@@ -92,7 +91,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "3d",
     });
 
     res.status(200).send({

@@ -2,12 +2,20 @@ import { Alert, Button, Label, TextInput, Spinner } from "flowbite-react";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../Redux/User/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState(null);
+  // const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -17,24 +25,23 @@ const Register = () => {
       !formData.password ||
       !formData.phone
     ) {
-      return setError("Please Fill Out The Fields");
+      return dispatch(signInFailure("Please Fill Out The Details"));
     }
     try {
-      setLoading(true);
-      setError(null);
+      dispatch(signInStart());
       const res = await axios.post("api/user/register", formData);
       if (res.data.success === false) {
-        return setError(res.data.message);
+        dispatch(signInFailure(res.data.message));
       }
-      setLoading(false);
+      // setLoading(false);
       if (res.data.success === true) {
+        dispatch(signInSuccess(res.data));
         navigate("/login");
       }
       // Handle response as needed
     } catch (error) {
       console.log(error);
-      setError(error.message);
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   };
 

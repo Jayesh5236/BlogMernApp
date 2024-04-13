@@ -109,4 +109,63 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Google Auth Register
+
+router.post("/google", async (req, res) => {
+  try {
+    const { name, email, googlePhotoUrl, mobileNumber } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (user) {
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "3d",
+      });
+
+      const { password, ...rest } = user._doc;
+      res.status(200).send({
+        success: true,
+        message: "Google Registration Is Done",
+        token,
+        user: rest,
+      });
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+
+      const hashedPassword = await bcryptjs.hash(generatedPassword, 12);
+
+      const newUser = new userModel({
+        username:
+          name.toLowerCase().split(" ").join("") +
+          Math.random().toString(9).slice(-4),
+        email,
+        phone: mobileNumber,
+        password: hashedPassword,
+        profilePicture: googlePhotoUrl,
+      });
+      await newUser.save();
+      const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "3d",
+      });
+      const { password, ...rest } = newUser._doc;
+
+      res.status(200).send({
+        success: true,
+        message: "Google Auth Register Done",
+        token,
+        newUser: rest,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Google Auth Failed",
+    });
+  }
+});
+
+
 export default router;

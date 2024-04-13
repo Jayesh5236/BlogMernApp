@@ -8,6 +8,7 @@ import {
   signInFailure,
 } from "../Redux/User/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import OAuth from "../Components/OAuth";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -127,6 +128,7 @@ const Register = () => {
                 "Register"
               )}
             </Button>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Have an account?</span>

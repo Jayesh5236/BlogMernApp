@@ -6,6 +6,7 @@ import {
   userRegistrationValidation,
 } from "../../Middleware/validations/index.js";
 import jwt from "jsonwebtoken";
+import authMiddleware from "../../utils/verifyUser.js";
 
 const router = express.Router();
 
@@ -167,5 +168,83 @@ router.post("/google", async (req, res) => {
   }
 });
 
+// Update User
+
+router.put("/update/:userID", authMiddleware, async (req, res) => {
+  try {
+    // console.log(req.user);
+    if (req.user._id !== req.params.userID) {
+      return res.status(403).send({
+        success: false,
+        message: "You Are Not Allowed To Update The User",
+      });
+    }
+
+    if (req.body.password) {
+      if (req.body.password.length < 6) {
+        return res.status(400).send({
+          success: false,
+          message: "Password Length Must Greater Than 6 Characters",
+        });
+      }
+      req.body.password = await bcryptjs.hash(req.body.password, 12);
+    }
+
+    if (req.body.username) {
+      if (req.body.username.length < 6 || req.body.username > 20) {
+        return res.status(400).send({
+          success: false,
+          message:
+            "Username Must be Greater Than 7 and Less Than 20 Characters",
+        });
+      }
+      if (req.body.username.includes(" ")) {
+        return res.status(401).send({
+          success: false,
+          message: "Username Can nOt Contain Spaces",
+        });
+      }
+
+      if (req.body.username !== req.body.username.toLowerCase()) {
+        return res.status(401).send({
+          success: false,
+          message: "Username Must Be in LowerCase",
+        });
+      }
+
+      if (!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
+        return res.status(401).send({
+          success: false,
+          message: "Username can only Contain Letters And Numbers",
+        });
+      }
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.userID,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.username,
+          profilePicture: req.body.profilePicture,
+          password: req.body.password,
+        },
+      },
+      { new: true }
+    );
+    const { password, ...rest } = updatedUser._doc;
+    res.status(200).send({
+      success: true,
+      message: "User Updated SuccessFully",
+      updatedUser: rest,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Updating User Failed",
+    });
+  }
+});
 
 export default router;

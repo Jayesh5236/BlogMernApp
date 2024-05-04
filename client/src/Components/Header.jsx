@@ -53,7 +53,7 @@ const Header = () => {
         >
           {theme === "light" ? <FaMoon /> :<FaSun /> }
         </Button>
-        {currentUser ? (
+        {currentUser && currentUser.user ? (
           <>
             <Dropdown
               arrowIcon={false}

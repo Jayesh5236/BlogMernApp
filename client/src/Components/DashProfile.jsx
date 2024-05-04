@@ -10,6 +10,13 @@ import {
 import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import {
+  updateFailure,
+  updateStart,
+  updateSuccess,
+} from "../Redux/User/userSlice";
+import { useDispatch } from "react-redux";
+import axios from "axios";
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
@@ -18,6 +25,8 @@ export default function DashProfile() {
   const filePickerRef = useRef();
   const [imageFileUploadProgress, setImageFileUploadProgress] = useState(null);
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
+  const [formData, setFormData] = useState({});
+  const dispatch = useDispatch();
   // console.log(imageFileUploadError, imageFileUploadProgress);
 
   const handleImageChange = (e) => {
@@ -51,12 +60,16 @@ export default function DashProfile() {
           "Could Not Upload Image (File Must Be Less Than 2MB)"
         );
         setImageFileUploadProgress(null);
-        setImageFile(null)
-        setImageFileUrl(null)
+        setImageFile(null);
+        setImageFileUrl(null);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
           setImageFileUrl(downloadUrl);
+          setFormData({
+            ...formData,
+            profilePicture: downloadUrl,
+          });
         });
       }
     );
@@ -68,10 +81,44 @@ export default function DashProfile() {
     }
   }, [imageFile]);
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (Object.keys(formData).length === 0) {
+      return;
+    }
+    try {
+      dispatch(updateStart());
+
+      const res = await axios.put(
+        `/api/user/update/${currentUser.user._id}`,
+        formData,{
+          headers:{
+            "auth-token": JSON.parse(localStorage.getItem(  "token"))
+          }
+        }
+      );
+      if (res.data.success === false) {
+        dispatch(updateFailure(res.data.message));
+      } else {
+        dispatch(updateSuccess(res.data));
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(updateFailure(error.message));
+    }
+  };
+
+  // console.log(formData);
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full lg:ml-80">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
-      <form className="flex flex-col gap-4">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <input
           type="file"
           accept="image/*"
@@ -121,14 +168,21 @@ export default function DashProfile() {
           id="username"
           placeholder="username"
           defaultValue={currentUser.user.username}
+          onChange={handleChange}
         />
         <TextInput
           type="email"
           id="email"
           placeholder="email"
           defaultValue={currentUser.user.email}
+          onChange={handleChange}
         />
-        <TextInput type="password" id="password" placeholder="password" />
+        <TextInput
+          type="password"
+          id="password"
+          placeholder="password"
+          onChange={handleChange}
+        />
         <Button type="submit" gradientDuoTone="purpleToBlue" outline>
           Update
         </Button>

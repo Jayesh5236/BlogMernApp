@@ -17,6 +17,7 @@ import {
 } from "../Redux/User/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
@@ -27,6 +28,7 @@ export default function DashProfile() {
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   // console.log(imageFileUploadError, imageFileUploadProgress);
 
   const handleImageChange = (e) => {
@@ -98,7 +100,7 @@ export default function DashProfile() {
         `/api/user/update/${currentUser.user._id}`,
         formData,{
           headers:{
-            "auth-token": JSON.parse(localStorage.getItem(  "token"))
+            "auth-token": JSON.parse(localStorage.getItem("auth-token"))
           }
         }
       );
@@ -106,6 +108,7 @@ export default function DashProfile() {
         dispatch(updateFailure(res.data.message));
       } else {
         dispatch(updateSuccess(res.data));
+        navigate("/")
       }
     } catch (error) {
       console.log(error);

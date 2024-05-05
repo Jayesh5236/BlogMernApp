@@ -247,4 +247,26 @@ router.put("/update/:userID", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete Account
+
+router.delete("/delete/:userId", authMiddleware, async (req, res) => {
+  try {
+    if (req.user._id !== req.params.userId) {
+      return res.status(403).send({
+        success: false,
+        message: "You Are Not Allowed To delete This User",
+      });
+    }
+
+    await userModel.findByIdAndDelete(req.params.userId);
+    res.status(200).json({ message: "User Has Been Deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "User Delete Failed",
+    });
+  }
+});
+
 export default router;
